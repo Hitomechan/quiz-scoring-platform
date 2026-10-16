@@ -73,6 +73,15 @@ if ! id -u quiz >/dev/null 2>&1; then
   green "    已创建系统用户 quiz"
 fi
 mkdir -p "$DATA_DIR"
+# 如果随代码一起上传了 data/db.json，且线上还没有数据，就把它作为初始数据搬过去
+if [ -f "$SRC/data/db.json" ] && [ ! -f "$DATA_DIR/db.json" ]; then
+  cp "$SRC/data/db.json" "$DATA_DIR/db.json"
+  green "    已把随代码上传的 db.json 导入为初始数据"
+elif [ -f "$DATA_DIR/db.json" ]; then
+  green "    已有数据文件，保持不动"
+else
+  blue "    首次启动会自动新建空题库"
+fi
 chown -R quiz:quiz "$DATA_DIR"
 green "    数据目录：$DATA_DIR"
 
