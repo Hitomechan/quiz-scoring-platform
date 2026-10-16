@@ -1,0 +1,33 @@
+[Unit]
+Description=Quiz Scoring Platform (在线答题系统)
+Documentation=https://github.com/Hitomechan/quiz-scoring-platform
+After=network-online.target
+Wants=network-online.target
+
+[Service]
+Type=simple
+User=quiz
+Group=quiz
+WorkingDirectory=/opt/quiz-site
+
+Environment=NODE_ENV=production
+Environment=HOST=0.0.0.0
+Environment=PORT=3210
+# 数据放在代码目录之外，升级代码时不会碰到数据
+Environment=DATA_DIR=/var/lib/quiz-site
+
+ExecStart=/usr/local/bin/node /opt/quiz-site/server.js
+Restart=always
+RestartSec=3
+StandardOutput=journal
+StandardError=journal
+SyslogIdentifier=quiz-site
+
+# 基本加固
+NoNewPrivileges=true
+PrivateTmp=true
+ProtectSystem=full
+ReadWritePaths=/var/lib/quiz-site
+
+[Install]
+WantedBy=multi-user.target

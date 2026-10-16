@@ -28,6 +28,17 @@ node server.js
 > 换端口：`set PORT=8080 && node server.js`
 > 给局域网内其他人答题：`set HOST=0.0.0.0 && node server.js`，然后把链接里的 `127.0.0.1` 换成你的内网 IP。
 
+### 部署到服务器（让别人通过公网访问）
+
+详见 **[DEPLOY.md](DEPLOY.md)** —— 腾讯云/阿里云轻量服务器从零到上线的完整步骤，含一键脚本：
+
+```bash
+cd /opt/quiz-site
+sudo bash deploy/install.sh
+```
+
+也支持 Docker：`docker compose up -d --build`
+
 ---
 
 ## 二、出题的完整流程

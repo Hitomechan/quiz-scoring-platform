@@ -1,0 +1,15 @@
+{
+  "name": "quiz-scoring-platform",
+  "version": "2.0.0",
+  "private": true,
+  "description": "零依赖在线答题系统：多套试卷、独立答题链接与二维码、自动判分、成绩统计与排序",
+  "main": "server.js",
+  "scripts": {
+    "start": "node server.js",
+    "test": "node tools/test-api.js"
+  },
+  "engines": {
+    "node": ">=18"
+  },
+  "license": "MIT"
+}

@@ -1,4 +1,5 @@
-const BASE = 'http://127.0.0.1:3210';
+const BASE = 'http://127.0.0.1:' + (process.env.PORT || 3210);
+const PASSWORD = process.env.ADMIN_PASSWORD || 'admin123';
 let pass = 0, fail = 0;
 function ok(name, cond, extra) {
   if (cond) { pass++; console.log('  PASS  ' + name); }
@@ -36,7 +37,7 @@ const TEXT_B = [
   ok('错误密码 401', r.status === 401);
   r = await j('/api/admin/papers');
   ok('无 token 401', r.status === 401);
-  r = await post('/api/admin/login', { password: 'admin123' });
+  r = await post('/api/admin/login', { password: PASSWORD });
   ok('登录成功', r.body && r.body.ok && r.body.token, r.body);
   const H = { 'x-admin-token': r.body.token };
 

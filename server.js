@@ -13,7 +13,8 @@ const crypto = require('crypto');
 
 const ROOT = __dirname;
 const PUBLIC_DIR = path.join(ROOT, 'public');
-const DATA_DIR = path.join(ROOT, 'data');
+/* 数据目录可用环境变量指定，方便部署时把数据放在代码目录之外（备份/升级更方便） */
+const DATA_DIR = process.env.DATA_DIR ? path.resolve(process.env.DATA_DIR) : path.join(ROOT, 'data');
 const DB_FILE = path.join(DATA_DIR, 'db.json');
 const PORT = Number(process.env.PORT || 3210);
 const HOST = process.env.HOST || '127.0.0.1';
@@ -627,6 +628,14 @@ const server = http.createServer(async (req, res) => {
 
   // 短链答题页
   if (p.startsWith('/p/')) { sendFile(res, path.join(PUBLIC_DIR, 'exam.html')); return; }
+
+  // 健康检查（部署探活用，不需要鉴权）
+  if (p === '/healthz') {
+    return sendJSON(res, 200, {
+      ok: true, papers: DB.papers.length, uptime: Math.round(process.uptime())
+    });
+  }
+
   if (!p.startsWith('/api/')) { serveStatic(res, req.url); return; }
 
   try {

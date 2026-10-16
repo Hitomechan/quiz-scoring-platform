@@ -1,0 +1,17 @@
+services:
+  quiz:
+    build: .
+    image: quiz-scoring-platform:latest
+    container_name: quiz-site
+    restart: unless-stopped
+    ports:
+      - "3210:3210"
+    environment:
+      HOST: 0.0.0.0
+      PORT: 3210
+      DATA_DIR: /data
+      # 只在数据文件还不存在时生效（首次启动的初始密码）
+      ADMIN_PASSWORD: ${ADMIN_PASSWORD:-}
+    volumes:
+      # 试卷、题目、成绩、管理密码都存在这里
+      - ./data:/data
