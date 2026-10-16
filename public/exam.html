@@ -1,0 +1,70 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>在线答题</title>
+<link rel="stylesheet" href="/css/style.css">
+<link rel="icon" href="data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'><text y='.9em' font-size='90'>📝</text></svg>">
+</head>
+<body>
+
+<div class="topbar">
+  <div class="inner">
+    <div class="brand"><span class="dot"></span><span id="brandTitle">在线答题</span></div>
+    <div class="spacer"></div>
+    <span class="muted" id="timer" style="font-variant-numeric:tabular-nums"></span>
+    <a class="btn ghost sm" href="/">其他试卷</a>
+  </div>
+</div>
+
+<div class="wrap" id="gateWrap" style="max-width:420px;margin-top:8vh;display:none">
+  <div class="card">
+    <div class="page-head" style="margin-bottom:16px">
+      <h1 style="font-size:22px">🔒 需要答题口令</h1>
+      <p id="gateDesc">这份试卷需要口令才能进入，请向出题人索取。</p>
+    </div>
+    <label class="field-label" for="gateInput">答题口令</label>
+    <input type="password" id="gateInput" placeholder="请输入口令" autocomplete="off">
+    <div class="err mt8" id="gateErr"></div>
+    <button class="btn block mt8" id="gateBtn">进入答题</button>
+  </div>
+</div>
+
+<div class="wrap" id="mainWrap" style="display:none">
+  <div class="page-head">
+    <h1 id="pageTitle">在线答题</h1>
+    <p id="pageSubtitle">加载中…</p>
+  </div>
+
+  <div class="card">
+    <label class="field-label" for="nameInput">① 姓名 <span style="color:var(--bad)">*</span></label>
+    <input type="text" id="nameInput" placeholder="请输入你的姓名" maxlength="40" autocomplete="off">
+    <div class="hint">提交后成绩会与这份试卷、你的姓名绑定，请如实填写。</div>
+  </div>
+
+  <div class="card" id="quizCard">
+    <div id="questions"></div>
+  </div>
+
+  <div class="card">
+    <div class="row between">
+      <div class="muted" id="progressTip">已作答 0 / 0 题</div>
+      <button class="btn lg" id="submitBtn">④ 提交答卷</button>
+    </div>
+    <div class="err mt8" id="submitErr"></div>
+  </div>
+</div>
+
+<div class="wrap" id="errorWrap" style="display:none">
+  <div class="card"><div class="empty-state">
+    <div class="big">😕</div>
+    <div id="errorMsg">试卷不存在</div>
+    <div class="mt16"><a class="btn" href="/">看看其他试卷</a></div>
+  </div></div>
+</div>
+
+<script src="/js/common.js"></script>
+<script src="/js/exam.js"></script>
+</body>
+</html>

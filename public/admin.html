@@ -1,0 +1,447 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>管理后台</title>
+<link rel="stylesheet" href="/css/style.css">
+<link rel="icon" href="data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'><text y='.9em' font-size='90'>⚙️</text></svg>">
+</head>
+<body>
+
+<div class="topbar">
+  <div class="inner">
+    <div class="brand"><span class="dot"></span><span id="brandTitle">管理后台</span></div>
+
+    <!-- 试卷工作区右上角：文字链接 + 二维码 -->
+    <div class="share-bar hidden" id="shareBar">
+      <button class="btn ghost sm" id="backToListBtn" title="返回试卷列表">← 试卷列表</button>
+      <span class="share-sep"></span>
+      <button class="share-label" id="sharePaperName" title="点击修改试卷名称"></button>
+      <button class="link-chip" id="shareLinkBtn" title="点击复制链接">
+        <span class="link-ico">🔗</span><span id="shareLinkText"></span>
+      </button>
+      <button class="btn ghost sm" id="shareQrBtn" title="显示二维码">▦ 二维码</button>
+      <span class="status-badge" id="shareStatus"></span>
+      <button class="btn sm" id="publishBtn">发布</button>
+    </div>
+
+    <div class="spacer"></div>
+    <a class="btn ghost sm" href="/" target="_blank">答题首页 ↗</a>
+    <button class="btn ghost sm hidden" id="logoutBtn">退出登录</button>
+  </div>
+</div>
+
+<!-- ==================== 登录 ==================== -->
+<div class="wrap" id="loginView" style="max-width:420px;margin-top:8vh">
+  <div class="card">
+    <div class="page-head" style="margin-bottom:16px">
+      <h1 style="font-size:22px">管理员登录</h1>
+      <p>请输入管理密码进入出题后台</p>
+    </div>
+    <label class="field-label" for="pwd">管理密码</label>
+    <input type="password" id="pwd" placeholder="请输入密码" autocomplete="current-password">
+    <div class="err mt8" id="loginErr"></div>
+    <button class="btn block mt8" id="loginBtn">登 录</button>
+    <div class="hint center mt16" id="defaultPwdTip"></div>
+  </div>
+</div>
+
+<!-- ==================== 主界面 ==================== -->
+<div class="wrap wide hidden" id="mainView">
+
+  <!-- ---------- 试卷列表 ---------- -->
+  <section id="view-papers">
+    <div class="page-head flex between" style="align-items:flex-start">
+      <div>
+        <h1>我的试卷</h1>
+        <p>每套试卷都有独立的答题链接和二维码，出完题点「发布」即可分享给别人</p>
+      </div>
+      <button class="btn lg" id="newPaperBtn">＋ 新建一套试卷</button>
+    </div>
+    <div id="paperGrid" class="paper-grid"></div>
+  </section>
+
+  <!-- ---------- 试卷工作区 ---------- -->
+  <section id="view-workspace" class="hidden">
+    <div class="admin-layout">
+      <div class="side">
+        <div class="card">
+          <button class="nav-item active" data-view="editor"><span class="ic">✏️</span>出新题</button>
+          <button class="nav-item" data-view="list"><span class="ic">📚</span>题库管理 <span class="muted" id="navCount"></span></button>
+          <button class="nav-item" data-view="import"><span class="ic">📥</span>批量导入</button>
+          <button class="nav-item" data-view="scores"><span class="ic">📊</span>成绩记录</button>
+          <button class="nav-item" data-view="stats"><span class="ic">📈</span>数据统计</button>
+          <button class="nav-item" data-view="paper"><span class="ic">🗂️</span>试卷设置</button>
+          <button class="nav-item" data-view="global"><span class="ic">⚙️</span>系统设置</button>
+          <button class="nav-item" data-view="share"><span class="ic">🔗</span>分享试卷</button>
+        </div>
+      </div>
+
+      <div>
+        <!-- 出新题 -->
+        <div id="sub-editor">
+          <div class="page-head">
+            <h1 id="editorTitle">出一道新题</h1>
+            <p>选好题型 → 填题干 → 设置正确答案。快捷键：<b>Ctrl + Enter</b> 保存</p>
+          </div>
+          <div class="card">
+            <div class="mb16">
+              <label class="field-label">题型</label>
+              <div class="row">
+                <button class="chip active" data-type="single" id="typeSingle">单选题</button>
+                <button class="chip" data-type="short" id="typeShort">简答题（多值用 、 分隔）</button>
+              </div>
+            </div>
+            <div class="mb16">
+              <label class="field-label" for="qTitle">题干 <span style="color:var(--bad)">*</span></label>
+              <textarea id="qTitle" placeholder="例：中国的首都是哪座城市？" rows="2"></textarea>
+            </div>
+            <div id="singleBox">
+              <label class="field-label">选项 <span style="color:var(--bad)">*</span> <span class="muted" style="font-weight:400">（点左侧圆圈标记正确答案）</span></label>
+              <div id="optionList"></div>
+              <div class="row mt8">
+                <button class="btn ghost sm" id="addOptionBtn">+ 添加选项</button>
+                <span class="muted">至少 2 个选项，最多 8 个</span>
+              </div>
+            </div>
+            <div id="shortBox" class="hidden">
+              <label class="field-label" for="shortAnswer">正确答案 <span style="color:var(--bad)">*</span></label>
+              <input type="text" id="shortAnswer" placeholder="例：红色、绿色、蓝色" autocomplete="off">
+              <div class="hint">多个答案用顿号（、）分隔；判分时顺序无关，大小写与空格忽略。</div>
+              <div class="hint" id="shortPreview"></div>
+            </div>
+            <div class="sep"></div>
+            <div class="total-bar">
+              <span class="tb-item">本套试卷共 <b id="tbCount">0</b> 题</span>
+              <span class="tb-sep"></span>
+              <span class="tb-item">当前总分 <b id="tbPoints" class="tb-pts">0</b> 分</span>
+              <span class="tb-preview" id="tbPreview"></span>
+            </div>
+            <div class="row between mt16">
+              <div class="row">
+                <label class="field-label" style="margin:0" for="qPoints">本题分值</label>
+                <input type="number" id="qPoints" value="1" min="0.5" step="0.5" style="width:90px">
+              </div>
+              <div class="row">
+                <button class="btn ghost" id="clearFormBtn">清空</button>
+                <button class="btn ghost" id="saveNewBtn">保存并继续出题</button>
+                <button class="btn" id="saveBtn">保存题目</button>
+              </div>
+            </div>
+            <div class="err mt8" id="editorErr"></div>
+          </div>
+          <div class="card" id="recentBox" style="display:none">
+            <div class="flex between" style="align-items:center;margin-bottom:10px">
+              <b style="font-size:14.5px">最近添加</b><span class="muted">可点“编辑”修改</span>
+            </div>
+            <div id="recentList"></div>
+          </div>
+        </div>
+
+        <!-- 题库管理 -->
+        <div id="sub-list" class="hidden">
+          <div class="page-head">
+            <h1>题库管理</h1>
+            <p>拖动左侧手柄可调整顺序，答题页会按此顺序展示</p>
+          </div>
+          <div class="card">
+            <div class="filter-bar">
+              <input type="text" id="searchBox" placeholder="搜索题干关键字…" style="max-width:220px">
+              <button class="chip active" data-f="all">全部</button>
+              <button class="chip" data-f="single">单选</button>
+              <button class="chip" data-f="short">简答</button>
+              <select id="qSortSelect" style="width:auto;min-width:190px" title="列表排序方式（不影响答题顺序）">
+                <option value="manual">手动顺序（答题顺序）</option>
+                <option value="pointsDesc">分值 高 → 低</option>
+                <option value="pointsAsc">分值 低 → 高</option>
+                <option value="rateAsc">正确率 低 → 高（最难在前）</option>
+                <option value="rateDesc">正确率 高 → 低</option>
+                <option value="title">按题干</option>
+              </select>
+              <div style="flex:1"></div>
+              <span class="muted" id="listStat"></span>
+            </div>
+            <div id="questionList"></div>
+          </div>
+        </div>
+
+        <!-- 批量导入 -->
+        <div id="sub-import" class="hidden">
+          <div class="page-head">
+            <h1>批量导入题目</h1>
+            <p>从 Word / 文档里复制粘贴，或使用竖线一行一题格式</p>
+          </div>
+          <div class="card">
+            <div class="grid2">
+              <div>
+                <label class="field-label" for="importText">粘贴题目文本</label>
+                <textarea id="importText" rows="16" placeholder="在这里粘贴题目…"></textarea>
+              </div>
+              <div>
+                <label class="field-label">支持的格式</label>
+                <div class="code">1. 中国的首都是哪座城市？（2分）
+A. 北京
+B. 上海
+C. 广州
+答案：A
+
+2. 请写出三种颜色
+答案：红色、绿色、蓝色
+
+—— 或者一行一题 ——
+单选|中国的首都是哪座城市？|北京|上海|广州|A
+简答|请写出三种颜色|红色、绿色、蓝色</div>
+                <div class="hint mt8">
+                  · 题号、选项标号（A. / A、/ A)）都可识别<br>
+                  · 题干末尾的 <b>（2分）</b> 会作为分值，默认 1 分<br>
+                  · 有选项 = 单选题，无选项 = 简答题<br>
+                  · 简答题答案用 <b>、</b> 分隔多个值
+                </div>
+              </div>
+            </div>
+            <div class="sep"></div>
+            <div class="row">
+              <button class="btn" id="parseBtn">解析预览</button>
+              <button class="btn ghost" id="importAppendBtn">追加到本套试卷</button>
+              <button class="btn ghost" id="importReplaceBtn">清空并替换本套试卷</button>
+              <div style="flex:1"></div>
+              <button class="btn ghost sm" id="sampleBtn">填入示例</button>
+            </div>
+            <div class="err mt8" id="importErr"></div>
+          </div>
+          <div class="card hidden" id="previewCard">
+            <b style="font-size:14.5px">解析结果预览</b>
+            <div id="previewList" class="mt8"></div>
+          </div>
+        </div>
+
+        <!-- 成绩记录 -->
+        <div id="sub-scores" class="hidden">
+          <div class="page-head">
+            <h1>成绩记录</h1>
+            <p id="scorePaperName">先选筛选条件，再点「查询」查看结果</p>
+          </div>
+
+          <div class="card">
+            <label class="field-label">筛选条件</label>
+            <div class="filter-grid">
+              <div class="fg-item">
+                <span class="fg-label">姓名</span>
+                <input type="text" id="fName" placeholder="按姓名包含…" autocomplete="off">
+              </div>
+              <div class="fg-item">
+                <span class="fg-label">试题</span>
+                <select id="fQuestion"><option value="">全部题目</option></select>
+              </div>
+              <div class="fg-item">
+                <span class="fg-label">该题结果</span>
+                <select id="fQStatus" disabled>
+                  <option value="any">不限</option>
+                  <option value="correct">答对</option>
+                  <option value="partial">部分正确</option>
+                  <option value="wrong">答错</option>
+                  <option value="blank">未作答</option>
+                </select>
+              </div>
+              <div class="fg-item">
+                <span class="fg-label">得分率</span>
+                <div class="row" style="flex-wrap:nowrap;gap:6px">
+                  <input type="number" id="fMin" min="0" max="100" placeholder="最低" style="width:88px">
+                  <span class="muted">~</span>
+                  <input type="number" id="fMax" min="0" max="100" placeholder="最高" style="width:88px">
+                  <span class="muted">%</span>
+                </div>
+              </div>
+              <div class="fg-item">
+                <span class="fg-label">是否及格</span>
+                <select id="fPass">
+                  <option value="">不限</option>
+                  <option value="true">仅及格</option>
+                  <option value="false">仅不及格</option>
+                </select>
+              </div>
+              <div class="fg-item">
+                <span class="fg-label">提交日期</span>
+                <div class="row" style="flex-wrap:nowrap;gap:6px">
+                  <input type="date" id="fFrom" style="width:150px">
+                  <span class="muted">~</span>
+                  <input type="date" id="fTo" style="width:150px">
+                </div>
+              </div>
+            </div>
+            <div class="row mt16">
+              <button class="btn" id="scoreQueryBtn">🔍 查询</button>
+              <button class="btn ghost" id="scoreResetBtn">重置</button>
+              <div style="flex:1"></div>
+              <a class="btn ghost sm" id="exportCsvBtn" href="#">导出明细 CSV</a>
+              <button class="btn danger sm" id="clearScoresBtn">清空本套记录</button>
+            </div>
+          </div>
+
+          <div class="stat-cards hidden" id="scoreStats"></div>
+
+          <div class="card">
+            <div class="flex between" style="align-items:center;margin-bottom:10px">
+              <b style="font-size:14.5px" id="scoreResultTitle">查询结果</b>
+              <span class="muted" id="scoreResultHint"></span>
+            </div>
+            <div id="scoreList"></div>
+          </div>
+        </div>
+
+        <!-- 数据统计 -->
+        <div id="sub-stats" class="hidden">
+          <div class="page-head">
+            <h1>数据统计</h1>
+            <p id="statsPaperName">按题目、按人员、按分数区间统计本套试卷</p>
+          </div>
+          <div class="stat-cards" id="statsOverview"></div>
+
+          <div class="card">
+            <div class="flex between" style="align-items:center;margin-bottom:12px">
+              <b style="font-size:14.5px">分数分布</b>
+              <span class="muted" id="statsDistHint"></span>
+            </div>
+            <div id="scoreDist"></div>
+          </div>
+
+          <div class="card">
+            <div class="filter-bar">
+              <b style="font-size:14.5px">按人员统计</b>
+              <input type="text" id="studentSearch" placeholder="搜索姓名…" style="max-width:200px">
+              <div style="flex:1"></div>
+              <a class="btn ghost sm" id="exportStudentsBtn" href="#">导出人员成绩 CSV</a>
+            </div>
+            <div class="hint mb8">同一姓名多次提交会合并统计；点表头排序</div>
+            <div id="studentTable"></div>
+          </div>
+
+          <div class="card">
+            <div class="filter-bar">
+              <b style="font-size:14.5px">按题目统计</b>
+              <select id="qStatSort" style="width:auto;min-width:200px">
+                <option value="index">按题号</option>
+                <option value="correctRate">正确率 低 → 高（最难在前）</option>
+                <option value="correctRateDesc">正确率 高 → 低</option>
+                <option value="avgEarnedAsc">平均得分 低 → 高</option>
+                <option value="avgEarnedDesc">平均得分 高 → 低</option>
+              </select>
+              <div style="flex:1"></div>
+              <a class="btn ghost sm" id="exportQuestionsBtn" href="#">导出题目统计 CSV</a>
+            </div>
+            <div id="questionStats"></div>
+          </div>
+        </div>
+
+        <!-- 试卷设置 -->
+        <div id="sub-paper" class="hidden">
+          <div class="page-head"><h1>试卷设置</h1><p>只影响当前这一套试卷</p></div>
+          <div class="card">
+            <label class="field-label" for="pTitle">试卷名称</label>
+            <input type="text" id="pTitle" maxlength="60" class="mb16">
+            <label class="field-label" for="pDesc">答题页说明文字</label>
+            <textarea id="pDesc" rows="2" class="mb16"></textarea>
+            <label class="field-label" for="pAccessCode">答题口令（留空表示不需要口令）</label>
+            <input type="text" id="pAccessCode" placeholder="例如：2026yuwen" class="mb16" autocomplete="off">
+            <div class="grid2">
+              <div>
+                <label class="field-label">及格线</label>
+                <div class="row">
+                  <label class="row" style="cursor:pointer">
+                    <input type="checkbox" id="pPassCustom" style="width:17px;height:17px;accent-color:var(--primary)">
+                    <span class="muted">单独设置</span>
+                  </label>
+                  <input type="number" id="pPass" min="0" max="100" step="1" style="width:90px">
+                  <span class="muted">%</span>
+                </div>
+              </div>
+              <div>
+                <label class="field-label">简答题部分给分</label>
+                <div class="row" style="padding-top:8px">
+                  <label class="row" style="cursor:pointer">
+                    <input type="checkbox" id="pPartialCustom" style="width:17px;height:17px;accent-color:var(--primary)">
+                    <span class="muted">单独设置</span>
+                  </label>
+                  <label class="row" style="cursor:pointer">
+                    <input type="checkbox" id="pPartial" style="width:17px;height:17px;accent-color:var(--primary)">
+                    <span>按比例给分</span>
+                  </label>
+                </div>
+              </div>
+            </div>
+            <div class="sep"></div>
+            <div class="row"><button class="btn" id="savePaperBtn">保存试卷设置</button></div>
+          </div>
+
+          <div class="card">
+            <label class="field-label">题库备份与维护</label>
+            <div class="row">
+              <a class="btn ghost sm" id="exportPaperBtn" href="#">导出本套题库 JSON</a>
+              <button class="btn ghost sm" id="duplicatePaperBtn">复制为新试卷</button>
+              <button class="btn danger sm" id="deletePaperBtn">删除这套试卷</button>
+            </div>
+            <div class="hint">删除试卷会同时删除它的成绩记录，且不可恢复。</div>
+          </div>
+        </div>
+
+        <!-- 系统设置 -->
+        <div id="sub-global" class="hidden">
+          <div class="page-head"><h1>系统设置</h1><p>全站生效</p></div>
+          <div class="card">
+            <label class="field-label" for="setTitle">网站标题</label>
+            <input type="text" id="setTitle" maxlength="60" class="mb16">
+            <label class="field-label" for="setSubtitle">答题首页说明文字</label>
+            <textarea id="setSubtitle" rows="2" class="mb16"></textarea>
+            <div class="grid2">
+              <div>
+                <label class="field-label" for="setPass">默认及格线（%）</label>
+                <input type="number" id="setPass" min="0" max="100" step="1">
+              </div>
+              <div>
+                <label class="field-label">默认简答题部分给分</label>
+                <label class="row" style="padding-top:8px;cursor:pointer">
+                  <input type="checkbox" id="setPartial" style="width:17px;height:17px;accent-color:var(--primary)">
+                  <span>答对部分要点时按比例给分</span>
+                </label>
+              </div>
+            </div>
+            <div class="sep"></div>
+            <div class="row"><button class="btn" id="saveSettingsBtn">保存系统设置</button></div>
+          </div>
+          <div class="card">
+            <label class="field-label" for="setPwd">修改管理密码</label>
+            <div class="row">
+              <input type="password" id="setPwd" placeholder="新密码（至少 4 位）" style="max-width:260px" autocomplete="new-password">
+              <button class="btn ghost" id="savePwdBtn">修改密码</button>
+            </div>
+          </div>
+        </div>
+
+        <!-- 分享 -->
+        <div id="sub-share" class="hidden">
+          <div class="page-head"><h1>分享试卷</h1><p>把链接或二维码发给答题的人</p></div>
+          <div class="card center">
+            <div class="share-panel">
+              <div class="qr-canvas-wrap"><canvas id="shareCanvas"></canvas></div>
+              <div class="share-url" id="shareUrlText"></div>
+              <div class="row center" style="justify-content:center;margin-top:14px">
+                <button class="btn" id="copyUrlBtn">复制链接</button>
+                <button class="btn ghost" id="downloadQrBtn">下载二维码</button>
+                <a class="btn ghost" id="openExamBtn" target="_blank">打开答题页 ↗</a>
+              </div>
+              <div class="hint mt16" id="shareHint"></div>
+            </div>
+          </div>
+        </div>
+
+      </div>
+    </div>
+  </section>
+</div>
+
+<script src="/js/common.js"></script>
+<script src="/js/qrcode.js"></script>
+<script src="/js/admin.js"></script>
+</body>
+</html>

@@ -1,0 +1,36 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>答题成绩</title>
+<link rel="stylesheet" href="/css/style.css">
+<link rel="icon" href="data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'><text y='.9em' font-size='90'>🏆</text></svg>">
+</head>
+<body>
+
+<div class="topbar">
+  <div class="inner">
+    <div class="brand"><span class="dot"></span><span id="brandTitle">在线答题</span></div>
+    <div class="spacer"></div>
+    <button class="btn ghost sm" onclick="window.print()">打印 / 存 PDF</button>
+    <a class="btn ghost sm" id="retryBtn" href="/">再答一次</a>
+    <a class="btn ghost sm" href="/">其他试卷</a>
+    <a class="btn ghost sm" href="/admin">管理后台</a>
+  </div>
+</div>
+
+<div class="wrap" id="app">
+  <div class="card center muted" id="loading" style="padding:60px">正在加载成绩…</div>
+  <div class="card" id="errorCard" style="display:none;padding:40px;text-align:center">
+    <div class="empty-state"><div class="big">😕</div><div id="errorMsg">找不到这份答卷</div>
+      <div class="mt16"><a class="btn" href="/">返回答题页</a></div></div>
+  </div>
+
+  <div id="content" style="display:none"></div>
+</div>
+
+<script src="/js/common.js"></script>
+<script src="/js/result.js"></script>
+</body>
+</html>
